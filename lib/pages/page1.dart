@@ -1,17 +1,27 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:states/controllers/user_controller.dart';
+import 'package:states/models/user.dart';
 
 class Page1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userCtrl = Get.find<UserController>(); 
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Page 1'),
       ),
-      body: UserInfo(),
+      body: Obx(
+        () => userCtrl.userExists.isTrue
+            ? UserInfo(user: userCtrl.user.value)
+            : Center(child: Text('No User')),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, 'page2'),
+        onPressed: () => Get.toNamed(
+          '/page2',
+          arguments: {'title': 'Options'},
+        ),
         child: Icon(Icons.add),
       ),
     );
@@ -19,9 +29,9 @@ class Page1 extends StatelessWidget {
 }
 
 class UserInfo extends StatelessWidget {
-  const UserInfo({
-    Key? key,
-  }) : super(key: key);
+  final User user;
+
+  const UserInfo({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +45,18 @@ class UserInfo extends StatelessWidget {
           Text('General'),
           Divider(),
           ListTile(
-            title: Text('Name: '),
+            title: Text('Name: ${user.name}'),
           ),
           ListTile(
-            title: Text('Age: '),
+            title: Text('Age: ${user.age}'),
           ),
           Divider(),
           Text('Professions'),
-          ListTile(
-            title: Text('Profession 1: '),
-          ),
-          ListTile(
-            title: Text('Profession 2: '),
-          ),
-          ListTile(
-            title: Text('Profession 3: '),
-          ),
+          ...user.professions!
+              .map((profession) => ListTile(
+                    title: Text(profession),
+                  ))
+              .toList(),
         ],
       ),
     );
