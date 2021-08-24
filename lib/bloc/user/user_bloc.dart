@@ -13,17 +13,19 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> mapEventToState(UserEvent event) async* {
     // Receives an Event and changes the State
     if (event is SetUser) {
-      yield UserState(user: event.user);
+      yield state.copyWith(user: event.user);
     } else if (event is ChangeAge) {
-      yield UserState(user: state.user!.copyWith(age: event.newAge));
+      yield state.copyWith(user: state.user!.copyWith(age: event.newAge));
     } else if (event is AddProfession) {
       final professions = [
         ...state.user!.professions!,
         event.profession,
       ];
-      yield UserState(user: state.user!.copyWith(professions: professions));
+      yield state.copyWith(
+        user: state.user!.copyWith(professions: professions),
+      );
     } else if (event is RemoveUser) {
-      yield UserState();
+      yield state.initialState();
     }
   }
 }

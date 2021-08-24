@@ -7,4 +7,9 @@ class UserState {
   UserState({User? user})
       : this.user = user ?? null,
         this.userExists = user != null;
+
+  UserState copyWith({required User? user}) =>
+      UserState(user: user ?? this.user);
+
+  UserState initialState() => UserState();
 }
