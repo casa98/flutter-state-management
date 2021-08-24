@@ -1,6 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:states/bloc/user/user_cubit.dart';
+import 'package:states/models/user.dart';
 
 class Page1 extends StatelessWidget {
   @override
@@ -8,8 +12,30 @@ class Page1 extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Page 1'),
+        actions: [
+          BlocBuilder<UserCubit, UserState>(
+            builder: (context, state) {
+              if (state is UserActice)
+                return IconButton(
+                  onPressed: () => context.read<UserCubit>().removeUser(),
+                  icon: Icon(Icons.delete),
+                );
+              return SizedBox();
+            },
+          ),
+        ],
       ),
-      body: UserInfo(),
+      body: BlocBuilder<UserCubit, UserState>(
+        builder: (context, state) {
+          // Could be replaced for a switch(state.runtimeType) statement
+          if (state is UserInitial)
+            return Center(child: Text('No User'));
+          else if (state is UserActice)
+            return UserInfo(user: state.user!);
+          else
+            return Center(child: Text('Unknown State!'));
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, 'page2'),
         child: Icon(Icons.add),
@@ -19,9 +45,9 @@ class Page1 extends StatelessWidget {
 }
 
 class UserInfo extends StatelessWidget {
-  const UserInfo({
-    Key? key,
-  }) : super(key: key);
+  final User user;
+
+  const UserInfo({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +61,16 @@ class UserInfo extends StatelessWidget {
           Text('General'),
           Divider(),
           ListTile(
-            title: Text('Name: '),
+            title: Text('Name: ${user.name}'),
           ),
           ListTile(
-            title: Text('Age: '),
+            title: Text('Age: ${user.age}'),
           ),
           Divider(),
           Text('Professions'),
-          ListTile(
-            title: Text('Profession 1: '),
-          ),
-          ListTile(
-            title: Text('Profession 2: '),
-          ),
-          ListTile(
-            title: Text('Profession 3: '),
-          ),
+          ...user.professions!
+              .map((profession) => ListTile(title: Text(profession)))
+              .toList(),
         ],
       ),
     );
